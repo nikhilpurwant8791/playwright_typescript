@@ -1,0 +1,16 @@
+Final Assessment:
+1) Create manual test cases for the application https://shop.polymer-project.org/ including one End-to-End (E2E) scenario and two negative test cases.
+2) Automate the created test cases using Playwright, following the Page Object Model (POM) design pattern.
+3) Ensure the End-to-End test case is data-driven.
+4) Follow automation best practices (clean code, reusable components, proper folder structure).
+5) Create a Git repository using your personal credentials, push the complete automation code, and share the repository link along with the manual testcases created.
+
+1. Create manual test cases for the application
+a. Verify broken links.
+b. Verify correct item is added to cart with correct quantity.
+
+2. E2E - Verify order Placed successfully.
+
+3. Negative Test cases
+a. Verify Error messages on checkout
+b. Verify user can not checkout with empty cart
