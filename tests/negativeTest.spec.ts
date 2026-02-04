@@ -1,18 +1,26 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
+import { HomePage } from '../pages/homePage';
+import { ProductPage } from '../pages/productPage';
+import { CheckoutPage } from '../pages/checkoutPage';
 
 test('Verify user can not checkout with empty cart', async ({ page }) => {
-    await page.goto('https://shop.polymer-project.org/');
-    await page.getByRole('button', { name: 'Shopping cart: 0 items' }).click();
-    await expect(page.getByRole('paragraph')).toContainText('Your is empty.');
+    const homePage = new HomePage(page);
+    await homePage.navigateHome();
+    await homePage.openShoppingCart();
+    await homePage.verifyEmptyCartMessage();
 });
 
 test('Verify Error messages on checkout', async ({ page }) => {
-    await page.goto('https://shop.polymer-project.org/');
-    await page.locator('#tabContainer').getByRole('link', { name: 'Men\'s Outerwear' }).click();
-    await page.getByRole('link', { name: 'Men\'s Tech Shell Full-Zip Men' }).click();
-    await page.getByRole('button', { name: 'Add this item to cart' }).click();
-    await page.getByRole('link', { name: 'Checkout' }).click();
-    await page.getByRole('button', { name: 'Place Order' }).click();
+    const homePage = new HomePage(page);
+    const productPage = new ProductPage(page);
+    const checkoutPage = new CheckoutPage(page);
+
+    await homePage.navigateHome();
+    await homePage.selectMensOuterwear();
+    await productPage.selectProduct('Men\'s Tech Shell Full-Zip Men');
+    await productPage.addProductToCart();
+    await checkoutPage.goToCheckout();
+    await checkoutPage.placeOrder();
 
     const errorMessages = [
         'Invalid Phone Number',
@@ -26,7 +34,5 @@ test('Verify Error messages on checkout', async ({ page }) => {
         'Invalid CVV'
     ];
 
-    for (const errorMsg of errorMessages) {
-        await expect(page.locator(`[error-message="${errorMsg}"]`).first()).toBeVisible();
-    }
-})
+    await checkoutPage.verifyAllErrorMessages(errorMessages);
+});

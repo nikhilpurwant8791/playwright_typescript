@@ -1,44 +1,83 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
+import { HomePage } from '../pages/homePage';
+import { ProductPage } from '../pages/productPage';
+import { CheckoutPage } from '../pages/checkoutPage';
+import { checkoutDataFixtures } from '../fixtures/checkoutDataFixture';
 
-test('test', async ({ page }) => {
-  await page.goto('https://shop.polymer-project.org/');
-  await page.locator('#tabContainer').getByRole('link', { name: 'Men\'s Outerwear' }).click();
-  await page.getByRole('link', { name: 'Men\'s Tech Shell Full-Zip Men' }).click();
-  await page.getByRole('button', { name: 'Add this item to cart' }).click();
-  await page.getByRole('button', { name: 'Close dialog' }).click();
-  await page.goto('https://shop.polymer-project.org/');
-  await page.getByRole('link', { name: 'Ladies Outerwear' }).first().click();
-  await page.getByRole('link', { name: 'Ladies Modern Stretch Full' }).click();
-  await page.getByRole('button', { name: 'Add this item to cart' }).click();
-  await page.getByRole('button', { name: 'Close dialog' }).click();
-  await page.goto('https://shop.polymer-project.org/');
-  await page.getByRole('link', { name: 'Men\'s T-Shirts' }).first().click();
-  await page.getByRole('link', { name: 'YouTube Organic Cotton T-' }).click();
-  await page.getByRole('button', { name: 'Add this item to cart' }).click();
-  await page.getByRole('link', { name: 'Checkout' }).click();
-  await page.getByRole('textbox', { name: 'Email Account Information' }).click();
-  await page.getByRole('textbox', { name: 'Email Account Information' }).fill('abc@gmail.com');
-  await page.getByRole('textbox', { name: 'Phone Number Account' }).click();
-  await page.getByRole('textbox', { name: 'Phone Number Account' }).fill('1234567891');
-  await page.getByRole('textbox', { name: 'Address Shipping Address' }).click();
-  await page.getByRole('textbox', { name: 'Address Shipping Address' }).fill('xyz road, testing');
-  await page.getByRole('textbox', { name: 'City Shipping Address' }).click();
-  await page.getByRole('textbox', { name: 'City Shipping Address' }).fill('Test1');
-  await page.getByRole('textbox', { name: 'State/Province Shipping' }).click();
-  await page.getByRole('textbox', { name: 'State/Province Shipping' }).fill('Test2');
-  await page.getByRole('textbox', { name: 'Zip/Postal Code Shipping' }).click();
-  await page.getByRole('textbox', { name: 'Zip/Postal Code Shipping' }).fill('450560');
-  await page.getByRole('textbox', { name: 'Cardholder Name' }).click();
-  await page.getByRole('textbox', { name: 'Cardholder Name' }).fill('tester1');
-  await page.getByRole('textbox', { name: 'Card Number' }).click();
-  await page.getByRole('textbox', { name: 'Card Number' }).fill('1234567891234567');
-  await page.getByRole('textbox', { name: 'CVV' }).click();
-  await page.getByRole('textbox', { name: 'CVV' }).fill('789');
-  await page.getByRole('button', { name: 'Place Order' }).click();
-  await expect(page.getByRole('paragraph')).toContainText('Demo checkout process complete.');
-  await expect(page.locator('#pages')).toContainText('Finish');
-  await expect(page).toHaveURL('https://shop.polymer-project.org/checkout/success');
-  await page.getByRole('link', { name: 'Finish' }).click();
-  await expect(page).toHaveURL('https://shop.polymer-project.org/');
+test('Complete end-to-end order placement', async ({ page }) => {
+  const homePage = new HomePage(page);
+  const productPage = new ProductPage(page);
+  const checkoutPage = new CheckoutPage(page);
 
+  await homePage.navigateHome();
+  await homePage.selectMensOuterwear();
+  await productPage.selectProduct('Men\'s Tech Shell Full-Zip Men');
+  await productPage.addProductToCart();
+  await productPage.closeDialog();
+
+  await homePage.navigateHome();
+  await homePage.selectLadiesOuterwear();
+  await productPage.selectProduct('Ladies Modern Stretch Full');
+  await productPage.addProductToCart();
+  await productPage.closeDialog();
+
+  await homePage.navigateHome();
+  await homePage.selectMensTShirts();
+  await productPage.selectProduct('YouTube Organic Cotton T-');
+  await productPage.addProductToCart();
+
+  await checkoutPage.goToCheckout();
+  await checkoutPage.fillCheckoutForm(checkoutDataFixtures[0]);
+  await checkoutPage.placeOrder();
+  await checkoutPage.verifyOrderSuccess();
+  await checkoutPage.clickFinish();
+  await checkoutPage.verifyReturnedToHome();
+});
+
+test('Order placement with different user - Dataset 2', async ({ page }) => {
+  const homePage = new HomePage(page);
+  const productPage = new ProductPage(page);
+  const checkoutPage = new CheckoutPage(page);
+
+  await homePage.navigateHome();
+  await homePage.selectMensOuterwear();
+  await productPage.selectProduct('Men\'s Tech Shell Full-Zip Men');
+  await productPage.addProductToCart();
+  await productPage.closeDialog();
+
+  await homePage.navigateHome();
+  await homePage.selectMensTShirts();
+  await productPage.selectProduct('YouTube Organic Cotton T-');
+  await productPage.addProductToCart();
+
+  await checkoutPage.goToCheckout();
+  await checkoutPage.fillCheckoutForm(checkoutDataFixtures[1]);
+  await checkoutPage.placeOrder();
+  await checkoutPage.verifyOrderSuccess();
+  await checkoutPage.clickFinish();
+  await checkoutPage.verifyReturnedToHome();
+});
+
+test('Order placement with another user - Dataset 3', async ({ page }) => {
+  const homePage = new HomePage(page);
+  const productPage = new ProductPage(page);
+  const checkoutPage = new CheckoutPage(page);
+
+  await homePage.navigateHome();
+  await homePage.selectLadiesOuterwear();
+  await productPage.selectProduct('Ladies Modern Stretch Full');
+  await productPage.addProductToCart();
+  await productPage.closeDialog();
+
+  await homePage.navigateHome();
+  await homePage.selectMensTShirts();
+  await productPage.selectProduct('YouTube Organic Cotton T-');
+  await productPage.addProductToCart();
+
+  await checkoutPage.goToCheckout();
+  await checkoutPage.fillCheckoutForm(checkoutDataFixtures[2]);
+  await checkoutPage.placeOrder();
+  await checkoutPage.verifyOrderSuccess();
+  await checkoutPage.clickFinish();
+  await checkoutPage.verifyReturnedToHome();
 });
